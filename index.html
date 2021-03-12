@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta content="text/html; charset=UTF-8" http-equiv="content-type"/>
+<title>Gradient Descent</title>
+
+<style>
+canvas, label {
+  display:block;
+  text-align:right;
+}
+nav {
+  position:fixed;
+  top:0;
+  right:0;
+  opacity:.7;
+}
+body {
+  width:800px;
+  margin:0 auto;
+  text-align:center;
+}
+</style>
+
+</head>
+<body>
+<nav>
+<label>f <input name=eq value="Math.pow(x+1, 2) + 1" /></label>
+<label>Guess <input name=guess type=number step=.1 value=".5" /></label>
+<label>Learning Rate <input name=lr type=number step=.1 min=.1 value=".1" /></label>
+<label>Required Iterations <input name=iterations disabled /></label>
+<label>Final x <input name=x disabled /></label>
+</nav>
+
+<canvas></canvas>
+
+<script>
+let canvas = document.querySelector("canvas")
+let ctx = canvas.getContext("2d")
+let scale = 5 // Relative scale vs a -1 to 1 unit graph
+let size = Math.min(window.innerHeight, window.innerWidth)
+let playback_timer
+
+canvas.width = size
+canvas.height = size
+
+ctx.scale(size/scale/2, -size/scale/2)
+ctx.translate(scale, -scale)
+ctx.lineWidth = 3*scale/size
+
+const fPrime = (x) => {
+  return (f(x+.01) - f(x-.01)) / .02
+}
+
+const f = (x) => {
+  return eval(document.querySelector("input[name=eq]").value)
+}
+
+const drawAxes = () => {
+  // Clear
+  ctx.clearRect(-scale, -scale, scale*2, scale*2)
+
+  // Draw axes
+  ctx.beginPath()
+  ctx.moveTo(-scale,0)
+  ctx.lineTo(scale,0)
+  ctx.moveTo(0,-scale)
+  ctx.lineTo(0,scale)
+  ctx.strokeStyle = "gray"
+  ctx.stroke()
+}
+
+const drawFunction = (f, color="blue") => {
+  ctx.beginPath()
+
+  ctx.moveTo(-scale,f(-scale))
+
+  for (let x = -scale; x <= scale; x+=.2) {
+    ctx.lineTo(x,f(x))
+  }
+  ctx.strokeStyle = color
+  ctx.stroke()
+}
+
+const drawPoint = (x, y, radius=8) => {
+  ctx.fillRect(x-radius*scale/size, f(x)-radius*scale/size, 2*radius*scale/size, 2*radius*scale/size)  
+}
+
+const drawDescent = () => {
+  let learningRate = parseFloat(document.querySelector('input[name=lr]').value)
+  let x = parseFloat(document.querySelector('input[name=guess]').value)
+
+  ctx.beginPath()
+  ctx.moveTo(x, f(x))
+
+  for (i = 0; i < 1000; i++) {
+    drawPoint(x, f(x))
+
+    if (Math.abs(fPrime(x)) < .01) break
+
+    x = x - learningRate*fPrime(x)
+
+    ctx.lineTo(x, f(x))
+  }
+
+  document.querySelector('input[name=iterations]').value = i
+  document.querySelector('input[name=x]').value = x
+
+  ctx.strokeStyle="red"
+  ctx.stroke()
+}
+
+const draw = () => {
+  drawAxes()
+  drawFunction(f, "blue")
+
+  drawDescent()
+}
+
+draw()
+
+document.querySelectorAll('input').forEach(el => {
+  el.addEventListener('input', draw)
+})
+</script>
+</body>
+</html>
