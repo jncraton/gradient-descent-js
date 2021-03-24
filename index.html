@@ -50,12 +50,12 @@ ctx.scale(size/scale/2, -size/scale/2)
 ctx.translate(scale, -scale)
 ctx.lineWidth = 10*scale/size
 
-const fPrime = (x) => {
-  return (f(x+.01) - f(x-.01)) / .02
-}
-
 const f = (x) => {
   return eval(document.querySelector("input[name=eq]").value)
+}
+
+const fPrime = (x) => {
+  return (f(x+.01) - f(x-.01)) / .02
 }
 
 const drawAxes = () => {
